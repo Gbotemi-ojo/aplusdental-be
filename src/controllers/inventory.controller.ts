@@ -23,7 +23,8 @@ export class InventoryController {
   }
 
   getItemById = async (req: Request, res: Response): Promise<void> => {
-    const itemId = parseInt(req.params.id);
+    const itemId = parseInt(req.params.id as string, 10);
+
     if (isNaN(itemId)) {
       res.status(400).json({ error: 'Invalid item ID.' });
       return;
@@ -50,13 +51,14 @@ export class InventoryController {
       return;
     }
 
-    const parsedQuantity = parseInt(quantity);
+    const parsedQuantity = parseInt(quantity as string, 10);
     const parsedUnitPrice = parseFloat(unitPrice);
 
     if (isNaN(parsedQuantity) || parsedQuantity < 0) {
       res.status(400).json({ error: 'Quantity must be a non-negative number.' });
       return;
     }
+
     if (isNaN(parsedUnitPrice) || parsedUnitPrice < 0) {
       res.status(400).json({ error: 'Unit Price must be a non-negative number.' });
       return;
@@ -76,27 +78,30 @@ export class InventoryController {
         res.status(409).json({ error: result.message });
         return;
       }
+
       res.status(201).json({ message: 'Inventory item added successfully!', item: result.item });
 
     } catch (error: any) {
       console.error('Error in addItem controller:', error);
-      // Catch specific Drizzle/DB errors here if needed, or handle in service layer
+      
       if (error.code === 'ER_DUP_ENTRY' || (error.message && error.message.includes('UNIQUE constraint failed'))) {
         res.status(409).json({ error: 'An inventory item with this name already exists.' });
         return;
       }
+
       res.status(500).json({ error: 'Server error adding inventory item.' });
     }
   }
 
   updateItem = async (req: Request, res: Response): Promise<void> => {
-    const itemId = parseInt(req.params.id);
+    const itemId = parseInt(req.params.id as string, 10);
     const { name, description, unitOfMeasure, reorderLevel, costPerUnit, supplier, category } = req.body;
 
     if (isNaN(itemId)) {
       res.status(400).json({ error: 'Invalid item ID.' });
       return;
     }
+
     if (!name || !unitOfMeasure || !category) {
       res.status(400).json({ error: 'Item name, category, and unit of measure are required for update.' });
       return;
@@ -111,8 +116,8 @@ export class InventoryController {
         res.status(result.message.includes('not found') ? 404 : 409).json({ error: result.message });
         return;
       }
-      res.json({ message: 'Inventory item updated successfully.' });
 
+      res.json({ message: 'Inventory item updated successfully.' });
     } catch (error: any) {
       console.error('Error in updateItem controller:', error);
       if (error.code === 'ER_DUP_ENTRY') {
@@ -124,7 +129,7 @@ export class InventoryController {
   }
 
   deleteItem = async (req: Request, res: Response): Promise<void> => {
-    const itemId = parseInt(req.params.id);
+    const itemId = parseInt(req.params.id as string, 10);
 
     if (isNaN(itemId)) {
       res.status(400).json({ error: 'Invalid item ID.' });
@@ -138,7 +143,6 @@ export class InventoryController {
         return;
       }
       res.json({ message: 'Inventory item and associated transactions deleted successfully.' });
-
     } catch (error) {
       console.error('Error in deleteItem controller:', error);
       res.status(500).json({ error: 'Server error deleting inventory item.' });
@@ -153,10 +157,12 @@ export class InventoryController {
       res.status(400).json({ error: 'Item ID, transaction type, and quantity are required.' });
       return;
     }
+
     if (!['stock_in', 'stock_out', 'adjustment'].includes(transactionType)) {
       res.status(400).json({ error: 'Invalid transaction type. Must be "stock_in", "stock_out", or "adjustment".' });
       return;
     }
+
     if (transactionType !== 'adjustment' && quantity <= 0) {
       res.status(400).json({ error: `Quantity must be positive for '${transactionType}' transaction.` });
       return;
@@ -172,12 +178,12 @@ export class InventoryController {
         res.status(statusCode).json({ error: result.message });
         return;
       }
+
       res.status(201).json({
         message: 'Inventory transaction recorded successfully.',
         transaction: result.transaction,
         newStockLevel: result.newStockLevel
       });
-
     } catch (error) {
       console.error('Error in recordTransaction controller:', error);
       res.status(500).json({ error: 'Server error recording inventory transaction.' });
@@ -185,7 +191,8 @@ export class InventoryController {
   }
 
   getTransactionsByItemId = async (req: Request, res: Response): Promise<void> => {
-    const itemId = parseInt(req.params.itemId);
+    const itemId = parseInt(req.params.itemId as string, 10);
+
     if (isNaN(itemId)) {
       res.status(400).json({ error: 'Invalid item ID.' });
       return;
@@ -211,7 +218,8 @@ export class InventoryController {
   }
 
   getItemStockStatus = async (req: Request, res: Response): Promise<void> => {
-    const itemId = parseInt(req.params.id);
+    const itemId = parseInt(req.params.id as string, 10);
+
     if (isNaN(itemId)) {
       res.status(400).json({ error: 'Invalid item ID.' });
       return;

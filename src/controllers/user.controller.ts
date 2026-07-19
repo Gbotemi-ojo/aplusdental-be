@@ -69,7 +69,7 @@ export class UserController {
       res.status(500).json({ error: 'Server error fetching doctor accounts.' });
     }
   };
-  
+
   getDoctorsAndOwners = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const doctorsAndOwners = await userService.getDoctorsAndOwners();
@@ -81,7 +81,8 @@ export class UserController {
   };
 
   getUserById = async (req: Request, res: Response): Promise<void> => {
-    const userId = parseInt(req.params.id);
+    const userId = parseInt(req.params.id as string, 10);
+    
     if (isNaN(userId)) {
       res.status(400).json({ error: 'Invalid user ID.' });
       return;
@@ -101,7 +102,7 @@ export class UserController {
   };
 
   updateUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const userId = parseInt(req.params.id);
+    const userId = parseInt(req.params.id as string, 10);
     const updateData = req.body;
     const currentLoggedInUserId = req.user!.userId;
 
@@ -120,7 +121,7 @@ export class UserController {
   };
 
   updateUserStatus = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const userId = parseInt(req.params.id);
+    const userId = parseInt(req.params.id as string, 10);
     const { isActive } = req.body;
     const currentLoggedInUserId = req.user!.userId;
 
@@ -139,7 +140,7 @@ export class UserController {
   };
 
   deleteUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const userId = parseInt(req.params.id);
+    const userId = parseInt(req.params.id as string, 10);
     const currentLoggedInUserId = req.user!.userId;
 
     if (isNaN(userId)) {
@@ -182,10 +183,12 @@ export class UserController {
       res.status(400).json({ error: 'All password fields are required.' });
       return;
     }
+
     if (newPassword !== confirmNewPassword) {
       res.status(400).json({ error: 'New passwords do not match.' });
       return;
     }
+
     if (newPassword.length < 8) {
       res.status(400).json({ error: 'New password must be at least 8 characters long.' });
       return;
